@@ -1,0 +1,30 @@
+---
+- name: Install nginx
+  gather_facts: true
+  hosts: all
+  become: true
+  tasks:
+    - name: Install nginx (Debian+)
+      ansible.builtin.apt:
+        name: nginx
+        state: present
+        update_cache: true
+        force: true
+      when: ansible_os_family | lower == "debian"
+
+    - name: Install nginx (RHEL+)
+      ansible.builtin.dnf:
+        name: nginx
+        state: present
+        update_cache: true
+      when: ansible_os_family | lower == "redhat"
+
+    - name: Start service
+      ansible.builtin.service:
+        name: nginx
+        state: started
+        enabled: true
+
+    - name: All is OK?
+      ansible.builtin.uri:
+        url: "http://{{ inventory_hostname }}"
